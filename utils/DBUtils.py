@@ -1,0 +1,258 @@
+import mysql.connector
+from utils.ParseJson import ParseJson
+import atexit
+import time
+import logging
+
+ParseJson = ParseJson()
+config = ParseJson.read_file("config.json")
+table_names = config["db_tables"]
+
+logging.basicConfig(level="WARNING")
+
+class DBUtils:
+    def __init__(self):
+        self.items = ["pokemon_id","lat","lon","expire_timestamp","move_1","move_2","gender","cp",
+                "iv","atk_iv","def_iv","sta_iv","form","level","weather","shiny","username","id","pvp",
+                "is_ditto","display_pokemon_id"]
+        self.raid_items = ["raid_pokemon_id","lat","lon","raid_end_timestamp","raid_pokemon_id","raid_level",
+                "ex_raid_eligible","raid_pokemon_move_1","raid_pokemon_move_2","raid_pokemon_cp",
+                "raid_pokemon_gender","id","name","team_id","raid_spawn_timestamp"]
+        self.weather_items = ["id", "latitude", "longitude", "gameplay_condition"]
+        self.quest_items = ["id","lat","lon","quest_timestamp","quest_title","quest_rewards",
+                "quest_pokemon_id","ar_scan_eligible","quest_target","name"]
+        self.incident_items = ["pokestop_id", "expiration", "`character`"]
+
+    def get_cnx(self):
+        cnx = mysql.connector.connect(
+                user=config["db_username"],
+                password=config["db_password"],
+                host=config["db_host"],
+                database=config["db_name"])
+        return cnx
+
+    def query_id(self, pokemon_id, min_iv, min_cp, min_lvl):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+        timestamp = time.time()+180
+        results = []
+                
+
+        for table in table_names:
+            if not pokemon_id:
+                query = (f"""SELECT {','.join(self.items)} from {table} WHERE
+                expire_timestamp > %s AND iv >= %s AND cp >= %s AND level >= %s""")
+                cursor.execute(query, (timestamp, min_iv, min_cp, min_lvl))
+            else:
+                query = (f"""SELECT {','.join(self.items)} from {table} WHERE
+                pokemon_id = %s AND expire_timestamp > %s AND iv >= %s AND cp >= %s AND level >= %s""")
+                cursor.execute(query, (pokemon_id, timestamp, min_iv, min_cp, min_lvl))
+
+            for pokemon in cursor:
+                poke_dict = {}
+                for key in self.items:
+                    poke_dict[key] = pokemon[self.items.index(key)]
+                results.append(poke_dict)
+
+        cursor.close()
+        cnx.close()
+        return results
+    
+    def query_raid_id(self, pokemon_id, tier):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+        timestamp = time.time()+180
+        results = []
+
+        values = [timestamp]
+        query = f"""SELECT {','.join(self.raid_items)} FROM gym WHERE
+        raid_end_timestamp > %s"""
+        if pokemon_id:
+            query += f""" AND raid_pokemon_id = %s"""
+            values.append(pokemon_id)
+        if tier != 0:
+            query += f""" AND raid_level = %s"""
+            values.append(tier)
+
+        values = tuple(values)
+        cursor.execute(query, values)
+
+        for raids in cursor:
+            raid_dict = {}
+            for key in self.raid_items:
+                raid_dict[key] = raids[self.raid_items.index(key)]
+            results.append(raid_dict)
+        
+        cursor.close()
+        cnx.close()
+        return results
+
+    def query_weather_id(self, weather_id):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+        results = []
+
+        values=[weather_id]
+        query = f"""SELECT {','.join(self.weather_items)} FROM weather WHERE
+        gameplay_condition = %s"""
+
+        values = tuple(values)
+        cursor.execute(query, values)
+
+        for weather in cursor:
+            weather_dict = {}
+            for key in self.weather_items:
+                weather_dict[key] = weather[self.weather_items.index(key)]
+            results.append(weather_dict)
+
+        cursor.close()
+        cnx.close()
+        return results
+
+    def query_quest(self, user_query, field):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+        results = []
+
+        values=[user_query]
+        query = f"""SELECT {','.join(self.quest_items)} FROM pokestop WHERE 
+        {field} LIKE '{user_query}' """
+
+        values = tuple(values)
+        cursor.execute(query)
+
+        for quest in cursor:
+            quest_dict = {}
+            for key in self.quest_items:
+                quest_dict[key] = quest[self.quest_items.index(key)]
+            results.append(quest_dict)
+
+        cursor.close()
+        cnx.close()
+        return results
+
+    def query_pokestops(self, pokestop_id_list):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+        results = []
+
+        query = f"""SELECT {','.join(self.quest_items)} FROM pokestop WHERE 
+        id IN {tuple(pokestop_id_list)}"""
+        cursor.execute(query)
+
+        for quest in cursor:
+            quest_dict = {}
+            for key in self.quest_items:
+                quest_dict[key] = quest[self.quest_items.index(key)]
+            results.append(quest_dict)
+
+        cursor.close()
+        cnx.close()
+        return results
+
+    def query_leaders(self, leader_id):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+        results = []
+        expiration_timestamp = time.time()+600
+
+        values = [expiration_timestamp, leader_id]
+
+        query = f"""SELECT {','.join(self.incident_items)} FROM incident WHERE 
+        expiration > %s AND `character` = %s"""
+        if isinstance(leader_id, list):
+            values = [expiration_timestamp]
+            query = f"""SELECT {','.join(self.incident_items)} FROM incident WHERE
+            expiration > %s AND `character` IN {tuple(leader_id)}"""
+
+        values = tuple(values)
+        cursor.execute(query, values)
+
+        for leader in cursor:
+            leader_dict = {}
+            for key in self.incident_items:
+                leader_dict[key] = leader[self.incident_items.index(key)]
+            results.append(leader_dict)
+
+        cursor.close()
+        cnx.close()
+        return results
+
+
+    def stream_query(self, params):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+        timestamp = time.time()+180
+        value_list = [timestamp]
+        results = []
+        item_choices = {"pokemon":self.items,"gym":self.raid_items,"weather":self.weather_items}
+
+        expire_timestamp = "expire_timestamp"
+        if params["type"] == "gym":
+            expire_timestamp = "raid_end_timestamp"
+
+        query_msg = f"""SELECT {','.join(item_choices[params['type']])} FROM {params['type']} 
+        WHERE {expire_timestamp} > %s AND """
+        if params["type"] == "weather":
+            del value_list[0]
+            query_msg = f"""SELECT {','.join(item_choices[params['type']])} FROM {params['type']} 
+            WHERE """
+
+        for parameter in params:
+            if parameter == "embed" or parameter == "type":
+                continue
+            value = params[parameter]
+            if not value:
+                continue
+            if isinstance(value, list):
+                query_msg += f"{parameter} >= %s AND {parameter} <= %s AND "
+                value_list.extend(value)
+                continue
+            query_msg += f"{parameter} = %s AND "
+            value_list.append(value)
+
+        query_msg = query_msg[:-4]
+        value_tuple = tuple(value_list)
+        query = (query_msg)
+
+        cursor.execute(query, value_tuple)
+
+        for pokemon in cursor:
+            poke_dict = {}
+            for key in item_choices[params["type"]]:
+                poke_dict[key] = pokemon[item_choices[params["type"]].index(key)]
+            results.append(poke_dict)
+
+        cursor.close()
+        cnx.close()
+        return results
+
+    def insert_pokemon(self, value_list):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+
+        for values in value_list:
+
+            all_items = self.items.copy()
+            all_items += ["expire_timestamp_verified","first_seen_timestamp"]
+            values += [1,0]
+
+            all_items.remove("iv")
+            values.remove("IV_REMOVE")
+
+            item_placeholder = ','.join(all_items)
+            val_placeholder = "%s, "*(len(all_items)-1)
+            val_placeholder += "%s"
+
+            sql = f"""INSERT INTO pokemon ({item_placeholder})
+            VALUES ({val_placeholder})"""
+
+            try:
+                cursor.execute(sql, values)
+                cnx.commit()
+            except Exception as e:
+                print(e)
+                pass
+
+        cursor.close()
+        cnx.close()
