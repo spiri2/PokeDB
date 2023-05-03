@@ -268,4 +268,4 @@ You can recieve webhook data in `json` format only by putting a unique string in
 
 # Support 
 
-Visit the Discord server if you have any questions or need support: https://discord.gg/Xm6mxekkab
+Visit the Discord server if you have any questions or need support: https://discord.gg/4rU2qu6KBY
