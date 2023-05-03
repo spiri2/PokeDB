@@ -104,12 +104,10 @@ The only fields that need to be configured manually are:
 
 Line 5: `def verify_YOURDISCORDNAMEHERE(self, user_id):`
 
-example: `def verify_spiri2(self, user_id):`
+Line 5 example: `def verify_spiri2(self, 1234567890):`
 
 Line 6: `return user_id == YOUR_DISCORD_ID_HERE`
 
-
-Line 5 example: `def verify_spiri2(self, 1234567890):`
 Line 6 example: `return user_id == 1234567890`
 
 ### /data/webhook_links.json (Optional)
