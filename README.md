@@ -73,7 +73,7 @@ The following steps must be taken:
 
 ## Clone the Repo
 
-Use `git clone https://github.com/spiri2/PokeDB.git`
+Use `git clone git@github.com:spiri2/PokeDB.git`
 
 ## Bot Configuration
 
