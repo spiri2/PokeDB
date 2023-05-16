@@ -1,12 +1,1 @@
-{
-    "prefix":"enter_desired_prefix_here",
-    "token":"enter_discordBot_token_here",
-    "channel_whitelist":[integer_value,integer_value2,integer_value3],
-    "psearch_embeds":[integer_value4,integer_value4,integer_value5],
-    "role_whitelist":[integer_value5,integer_value6,integer_value7],
-    "db_username":"rdm_database_username",
-    "db_password":"rdm_database_password",
-    "db_host":"rdm_database_ip_address",
-    "db_name":"rdm_database_name",
-    "db_tables":["rdm_database_pokemon_table_name1","rdm_database_pokemon_table_name2"]
-}
+{"prefix": "!", "token": "DISCORD-TOKEN", "channel_whitelist": [], "psearch_embeds": [], "role_whitelist": [], "db_username": "DB-USERNAME-HERE", "db_password": "DB-PASSWORD-HERE", "db_host": "DB-HOST-HERE", "db_name": "rdmdb", "db_tables": ["pokemon"]}

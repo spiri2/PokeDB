@@ -23,13 +23,13 @@ translation = ParseJson.read_file("en.json")
 class MsgUtils:
     def __init__(self):
         self.weather_emojis = {
-                "1":"<a:sunny_boosted:1087066147930775624>",
-                "2":"<a:rainy_boosted:1087066144264945734>",
-                "3":"<a:partly_cloudy_boosted:1087066143069577306>",
-                "4":"<a:cloudy_boosted:1087066138841731242>",
-                "5":"<a:Windy_boosted:1087066149876928542>",
-                "6":"<a:snowy_boosted:1087066146185936896>",
-                "7":"<a:foggy_boosted:1087066140955643944>"
+                "1":"<a:sunny_boosted:1086001133681643611>",
+                "2":"<a:rainy_boosted:1086017199405281411>",
+                "3":"<a:partly_cloudy_boosted:1086001128761725068>",
+                "4":"<a:cloudy_boosted:1086017193348694068>",
+                "5":"<a:Windy_boosted:1086001138261840003>",
+                "6":"<a:snowy_boosted:1086017487197446256>",
+                "7":"<a:foggy_boosted:1086017195269697628>"
                 }
     def get_gif(self, poke_id, shiny=False, item=False, leader=False):
         #name = name.lower()
@@ -102,10 +102,10 @@ class MsgUtils:
 
         ar = ""
         if data["ar_scan_eligible"]:
-            ar = "<:AR:1087066857334395004>"
+            ar = "<:AR:1103208223495954442>"
 
         try:
-            pokestop_emoji = "<:pokestop:1087068131228405841>"
+            pokestop_emoji = "<:pokestop:1103208246132609025>"
             pokestop_name = ar+pokestop_emoji+data["name"]
         except:
             pokestop_name = ar+"Quest"
@@ -286,20 +286,20 @@ class MsgUtils:
         pokemon_name = pokemon_list[poke_id-1]
         ex = ""
         if data["ex_raid_eligible"]:
-            ex = "<:EX:1087066226049687702>"
-        cp = f"<:CP:1087066222308364328> {data['raid_pokemon_cp']}"
+            ex = "<:EX:1103208230676606987>"
+        cp = f"<:CP:1103208227358912512> {data['raid_pokemon_cp']}"
         if data["raid_pokemon_cp"] == 0:
             return None
-        ms = "<:MS:1087066235704967332>"
-        mystic = "<a:Mystic:1087068166808674354>"
-        instinct = "<a:Instinct:1087068164958994452>"
-        valor = "<a:Valor:1087068168574488717>"
+        ms = "<:MS:1103208325069406228>"
+        mystic = "<a:Mystic:1086001126891073617>"
+        instinct = "<a:Instinct:1086001085317136526>"
+        valor = "<a:Valor:1086001135493599442>"
         teams = [mystic,valor,instinct]
         team = teams[data["team_id"]-1]
-        gender = "<:male:1087068017793433672>" #male gender sign
+        gender = "<:male2:1103208241204297748>" #male gender sign
         gender_num = data["raid_pokemon_gender"]
         if gender_num == 2:
-            gender = "<:female:1087068015222325279> "
+            gender = "<:Female:1103209016001314854> "
         mega = ""
         if data["raid_level"] == 6:
             mega = "{Mega}"
@@ -391,16 +391,16 @@ class MsgUtils:
         poke_id = data["pokemon_id"]
         pokemon_name = pokemon_list[poke_id-1]
         form = data["form"]
-        iv = "<:IV:1087066230722150420>"
-        cp = "<:CP:1087066222308364328>"
-        dsp = "<:DSP:1087068128246255636>"
-        lvl = "<:LV:1087066232286613654>"
-        ms = "<:MS:1087066235704967332>"
-        shiny = "<a:Shiny:1087066237139423382>"
-        gender = "<:male:1087068017793433672>" #male gender sign
+        iv = "<:IV:1103208235558764544>"
+        cp = "<:CP:1103208227358912512>"
+        dsp = "<:DSP:1103208228793360394>"
+        lvl = "<:LV:1103208238268293192>"
+        ms = "<:MS:1103208325069406228>"
+        shiny = "<a:Shiny:1086001130544320634>"
+        gender = "<:male2:1103208241204297748>" #male gender sign
         gender_num = data["gender"]
         if gender_num == 2:
-            gender = "<:female:1087068015222325279> "
+            gender = "<:Female:1103209016001314854> "
 
         boosted = self.get_weather_boost(poke_id, data["weather"])
 
@@ -489,7 +489,7 @@ class MsgUtils:
         if data["shiny"]:
             if user_obj:
                 msg += f"\n{user_obj.mention}"
-            desc+=f"{shiny} **Shiny {pokemon_name} found!** {shiny}"
+            desc+=f"{shiny}**{data['username']} found a shiny!{shiny}**"
        
         emb = discord.Embed(
                 title=f"{pokemon_name} {gender} {expire_time}",
@@ -507,3 +507,63 @@ class MsgUtils:
         #emb.set_footer(text=f"{location}", icon=country_emoji)
 
         return [msg,emb]
+
+    def msg_builder_stats(self, pokemon_stats, account_stats, stats_time):
+        pokemon_labels = [
+                "<:pokeball:1103208408712216607> Pokemon: ",
+                ":100:IV: ",
+                "<a:Shiny:1086001130544320634> Shiny: ",
+                "<:raid:1107859808926826536> Raids: ",
+                "<:pokestop:1103208246132609025> Quests: ",
+                "<:rocketteam:1107860171885117460> Invasions: "
+                ]
+        account_labels = [
+                "<:check:1103208226155143209> Accounts Created: ",
+                "<:check:1103208226155143209> Accounts Level 30+: ",
+                "<:check:1103208226155143209> Accounts Level 0: ",
+                "<:check:1103208226155143209> Accounts Available: ",
+                "<:check:1103208226155143209> Accounts In Use: ",
+                "<:warned:1107863956023951381> Accounts Disabled: ",
+                "<:warned:1107863956023951381> Accounts w/ Warning: ",
+                ":exclamation: Accounts Failed: "
+                ]
+
+
+        daily_desc = ""
+        multiday_desc = ""
+
+        count = 0
+        for key in pokemon_stats:
+            daily_desc += f"{pokemon_labels[count]}"
+            daily_desc += f"{format(pokemon_stats[key][0],',d')}\n"
+            multiday_desc += f"{pokemon_labels[count]}"
+            multiday_desc += f"{format(pokemon_stats[key][1],',d')}\n"
+
+            count+=1
+
+        stats_time = stats_time[0].strftime("%m/%d/%Y")
+        daily_emb = discord.Embed(
+                title=f"Daily Stats - {stats_time}",
+                description=daily_desc,
+                color=discord.Color.blue())
+        multiday_emb = discord.Embed(
+                title="Weekly Avg Stats",
+                description=multiday_desc,
+                color=discord.Color.blue())
+
+        account_desc = ""
+
+        count = 0
+        for key in account_stats:
+            account_desc += account_labels[count]
+            account_desc += f"{format(account_stats[key],',d')}\n"
+
+            count +=1
+
+        account_emb = discord.Embed(
+                title="Account Stats",
+                description=account_desc,
+                color=discord.Color.blue())
+
+        return [daily_emb, multiday_emb, account_emb]
+

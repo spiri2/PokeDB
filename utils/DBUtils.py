@@ -256,3 +256,82 @@ class DBUtils:
 
         cursor.close()
         cnx.close()
+
+    def get_stats(self):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+
+        pokemon_stats = {
+                "pokemon_stats":[],
+                "pokemon_hundo_stats":[],
+                "pokemon_shiny_stats":[],
+                "quest_stats":[],
+                "invasion_stats":[],
+                }
+
+        account_stats = {
+                "accounts_created":0,
+                "accounts_leveled":0,
+                "accounts_lvl0":0,
+                "accounts_available":0,
+                "accounts_in_use":0,
+                "accounts_disabled":0,
+                "accounts_warning":0,
+                "accounts_failed":0
+                }
+
+        for stat_type in pokemon_stats:
+            sql = f"SELECT SUM(count) FROM {stat_type} GROUP BY date"
+            cursor.execute(sql)
+
+            c_list = list(cursor)
+
+            pokemon_stats[stat_type].append(int(c_list[-1][0]))
+
+            days = 7
+            if len(c_list) < 7:
+                days = len(c_list)
+
+            average = 0
+            days_stats = c_list[len(c_list)-days:]
+            for day in days_stats:
+                average += day[0]
+            average = int(average / days)
+
+            pokemon_stats[stat_type].append(average)
+
+        sql = f"SELECT username, level, disabled, failed, warn, banned, last_used_timestamp FROM account"
+        cursor.execute(sql)
+
+        for account in cursor:
+            account = list(account)
+
+            if account[0]:
+                account_stats["accounts_created"] += 1
+            if account[1] >= 30:
+                account_stats["accounts_leveled"] += 1
+            elif account[1] == 0:
+                account_stats["accounts_lvl0"] += 1
+            if account[2]:
+                account_stats["accounts_disabled"] += 1
+            if account[3]:
+                account_stats["accounts_failed"] += 1
+            if account[4]:
+                account_stats["accounts_warning"] += 1
+            if not account[2] and not account[3] and not account[4] and not account[5]:
+                account_stats["accounts_available"] += 1
+
+        sql = "SELECT uuid FROM device"
+        cursor.execute(sql)
+
+        accounts_used = len(list(cursor))
+        account_stats["accounts_in_use"] = accounts_used
+        account_stats["accounts_available"] -= accounts_used
+
+        sql = "SELECT date FROM pokemon_hundo_stats"
+        cursor.execute(sql)
+        stats_time = list(cursor)[-1]
+
+        cursor.close()
+        cnx.close()
+        return [pokemon_stats, account_stats, stats_time]

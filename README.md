@@ -102,13 +102,7 @@ The only fields that need to be configured manually are:
  
  ### /utils/verification.py
 
-Line 5: `def verify_YOURDISCORDNAMEHERE(self, user_id):`
-
-Line 5 example: `def verify_spiri2(self, 1234567890):`
-
 Line 6: `return user_id == YOUR_DISCORD_ID_HERE`
-
-Line 6 example: `return user_id == 1234567890`
 
 ### /data/webhook_links.json (Optional)
 
@@ -133,11 +127,19 @@ Its format is displayed below:
 
 Youll need to add the emote IDs from your server in `utils/MsgUtils.py`:
 
-Weather emotes : `lines 25-31` 
+Weather emotes : `lines 26-32`
 
-Raid emotes : `lines 288-301`
+AR Emote : `line 105`
 
-Wild Spawn emotes : `lines 393-401`
+Pokestop Emote : `line 108`
+
+Raid emotes : `lines 288-302`
+
+Wild Spawn emotes : `lines 394-403`
+
+Great/Ultra League Emote : `Lines 453-454`
+
+Stats Emotes : `Lines 513-528`
 
 # Starting Procedures
 
@@ -257,6 +259,10 @@ This will provide a drop down menu:
 `/untrack`
 
 Removes the streams from the channel the command was used in.
+
+`/stats`
+
+Provides stats for pokemon data in a 24 hour period, provides the aevrage amount of pokemon data you get in a 7 day period, and provides account stats.
 
 More features are being added.
 

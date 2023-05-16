@@ -518,5 +518,23 @@ class DBCommands(commands.Cog):
         await interaction.followup.send(f"Data stream removed from {interaction.channel.mention}", 
                 ephemeral=True)
 
+    @app_commands.command(name="stats",
+            description="Show pokemon and account stats. (Admin-Only)")
+    async def stats(self, interaction: discord.Interaction):
+        if not Verification.verify_on_whitelist(interaction.user.id, 
+                interaction.user.roles):
+            await interaction.response.send_message("You aren't authorized to use this command.", ephemeral=True)
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        stats_info = DBUtils.get_stats()
+        embed_list = MsgUtils.msg_builder_stats(stats_info[0], stats_info[1], stats_info[2])
+
+        await interaction.followup.send(embeds=embed_list, ephemeral=True)
+
+
+
+
 async def setup(bot):
     await bot.add_cog(DBCommands(bot))

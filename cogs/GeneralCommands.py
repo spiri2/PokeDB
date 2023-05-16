@@ -106,7 +106,7 @@ class GeneralCommands(commands.Cog):
 
     @admin_group.command(name="add", description="Add users/roles to admin whitelist.")
     async def admin_add(self, interaction:discord.Interaction, item_id:str):
-        if not Verification.verify_spiri2(interaction.user.id):
+        if not Verification.verify_owner(interaction.user.id):
             await interaction.response.send_message("You're not authorized to use this command.",
                     ephemeral=True)
             return
@@ -129,7 +129,7 @@ class GeneralCommands(commands.Cog):
 
     @admin_group.command(name="remove", description="Remove users/roles from admin whitelist.")
     async def admin_remove(self, interaction:discord.Interaction, item_id:str):
-        if not Verification.verify_spiri2(interaction.user.id):
+        if not Verification.verify_owner(interaction.user.id):
             await interaction.response.send_message("You're not authorized to use this command.",
                     ephemeral=True)
             return

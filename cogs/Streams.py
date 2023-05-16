@@ -33,15 +33,16 @@ class Streams(commands.Cog):
         timestamp = time.time()
         if timestamp >= self.clear_time:
             self.cache = {}
-            self.clear_time = timestamp+600
+            self.clear_time = timestamp+120
 
     def clear_weather_cache(self):
         timestamp = time.time()
         if timestamp >= self.clear_time_weather:
             self.weather_cache = {}
-            self.clear_time_weather = timestamp+600
+            #self.clear_time_weather = timestamp+3600
+            self.clear_time_weather = timestamp+3600
 
-    @tasks.loop(seconds=600)
+    @tasks.loop(seconds=300)
     async def streamer(self):
         self.clear_cache()
         self.clear_weather_cache()
@@ -49,7 +50,7 @@ class Streams(commands.Cog):
         streams = ParseJson.read_file("streams.json")
         pogo_users = ParseJson.read_file("pogo_users.json")
 
-        GLOBAL_LIMIT = 300 
+        GLOBAL_LIMIT = 400 
         stream_length = len(streams)
         if stream_length < 1:
             stream_limit = 0

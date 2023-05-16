@@ -2,8 +2,8 @@ from utils.ParseJson import ParseJson
 ParseJson = ParseJson()
 
 class Verification:
-    def verify_YOUR-DISCORD-NAME-HERE(self, user_id):
-        return user_id == YOUR-DISCORD-ID-HERE 
+    def verify_owner(self, user_id):
+        return user_id == YOUR-DISCORD-ID 
 
     def modify_whitelist(self, item_id, append=True):
         whitelist = ParseJson.read_file("admin_whitelist.json")
