@@ -31,12 +31,20 @@ class DBUtils:
                 database=config["db_name"])
         return cnx
 
+    def get_device_name(self, account_username):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+
+        sql = "SELECT uuid FROM device WHERE account_username = %s"
+        cursor.execute(sql, (account_username,))
+
+        return list(cursor)[0]
+
     def query_id(self, pokemon_id, min_iv, min_cp, min_lvl):
         cnx = self.get_cnx()
         cursor = cnx.cursor()
         timestamp = time.time()+180
         results = []
-                
 
         for table in table_names:
             if not pokemon_id:
@@ -90,11 +98,12 @@ class DBUtils:
     def query_weather_id(self, weather_id):
         cnx = self.get_cnx()
         cursor = cnx.cursor()
+        timestamp = time.time()-43200
         results = []
 
-        values=[weather_id]
+        values=[weather_id, timestamp]
         query = f"""SELECT {','.join(self.weather_items)} FROM weather WHERE
-        gameplay_condition = %s"""
+        gameplay_condition = %s AND updated > %s"""
 
         values = tuple(values)
         cursor.execute(query, values)
@@ -268,7 +277,6 @@ class DBUtils:
                 "quest_stats":[],
                 "invasion_stats":[],
                 }
-
         account_stats = {
                 "accounts_created":0,
                 "accounts_leveled":0,
@@ -279,6 +287,8 @@ class DBUtils:
                 "accounts_warning":0,
                 "accounts_failed":0
                 }
+        device_stats = []
+        
 
         for stat_type in pokemon_stats:
             sql = f"SELECT SUM(count) FROM {stat_type} GROUP BY date"
@@ -332,6 +342,29 @@ class DBUtils:
         cursor.execute(sql)
         stats_time = list(cursor)[-1]
 
+        sql = "SELECT uuid, instance_name, account_username, last_seen FROM device"
+        cursor.execute(sql)
+        for device in cursor:
+            device_stats.append(
+                {"uuid":device[0],
+                "instance_name":device[1],
+                "account_username":device[2],
+                "last_seen":device[3]
+                })
+
         cursor.close()
         cnx.close()
-        return [pokemon_stats, account_stats, stats_time]
+        return [pokemon_stats, account_stats, stats_time, device_stats]
+
+
+    def truncate(self, table_name):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+
+        sql = f"SET foreign_key_checks = 0; TRUNCATE TABLE {table_name}; SET foreign_key_checks = 1"
+        try:
+            cursor.execute(sql)
+            return 1
+        except Exception as e:
+            print(e)
+            return e
