@@ -43,9 +43,17 @@ class MenuSelect(discord.ui.Select):
                 discord.SelectOption(label="Jessie"),
                 discord.SelectOption(label="James")
                 ]
+        self.table_options = [
+                discord.SelectOption(label="Account"),
+                discord.SelectOption(label="Device"),
+                discord.SelectOption(label="Pokemon"),
+                discord.SelectOption(label="Quest"),
+                discord.SelectOption(label="Weather")
+                ]
         command_info = {"wsearch":["Select weather option.",self.weather_options],
                 "weather_track":["Select weather option.",self.weather_options],
-                "rocketsearch":["Select leader.",self.leader_options]}
+                "rocketsearch":["Select leader.",self.leader_options],
+                "truncate":["Select table.",self.table_options]}
 
         super().__init__(placeholder=command_info[self.command_name][0], 
                 min_values=1,
@@ -91,6 +99,21 @@ class MenuSelect(discord.ui.Select):
                 msg += f"{args[argument]}\n"
             msg += "```"
             await interaction.followup.send(msg, ephemeral=True)
+
+        if self.command_name == "truncate":
+            table_name = self.values[0].lower()
+            if table_name == "quest":
+                table_name = "pokestop"
+            '''
+            status = DBUtils.truncate(table_name)
+
+            if status == 1:
+                await interaction.followup.send("Truncate success.", ephemeral=True)
+            else:
+                await interaction.followup.send(f"Truncate failed.\n```{status}```", ephemeral=True)
+            '''
+            view = ButtonView(table_name)
+            await interaction.followup.send(f"Truncate `{table_name}`?",view=view, ephemeral=True)
 
         if self.command_name == "rocketsearch":
             translation = ParseJson.read_file("en.json")
@@ -143,9 +166,47 @@ class MenuView(discord.ui.View):
         super().__init__()
         self.add_item(MenuSelect(command))
 
+class ConfirmButton(discord.ui.Button):
+    def __init__(self, table_name):
+        super().__init__(label="Confirm",style=discord.ButtonStyle.green)
+        self.table_name = table_name
+
+    async def callback(self, interaction):
+        status = DBUtils.truncate(self.table_name)
+
+        if status == 1:
+            await interaction.response.edit_message(content="Truncate success.", view=None)
+        else:
+            await interaction.response.edit_message(content=f"Truncate failed.\n```{status}```", view=None)
+
+class CancelButton(discord.ui.Button):
+    def __init__(self):
+        super().__init__(label="Cancel",style=discord.ButtonStyle.red)
+
+    async def callback(self, interaction):
+        await interaction.response.edit_message(content="Truncate canceled.", view=None)
+
+class ButtonView(discord.ui.View):
+    def __init__(self, table_name):
+        super().__init__()
+
+        self.add_item(ConfirmButton(table_name))
+        self.add_item(CancelButton())
+
 class DBCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @app_commands.command(name="truncate", description="Clear RDM tables.")
+    async def truncate(self, interaction:discord.Interaction):
+        if not Verification.verify_owner(interaction.user.id):
+            await interaction.response.send_message("You are not authorized to use this command.",
+                    ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        view = MenuView("truncate")
+        await interaction.followup.send(view=view, ephemeral=True)
 
     @app_commands.command(name="psearch", description="Search by Pokemon name or min. IV")
     async def psearch(self, interaction:discord.Interaction, name:str, min_iv:int=0,
@@ -529,7 +590,8 @@ class DBCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         stats_info = DBUtils.get_stats()
-        embed_list = MsgUtils.msg_builder_stats(stats_info[0], stats_info[1], stats_info[2])
+        embed_list = MsgUtils.msg_builder_stats(stats_info[0], stats_info[1],
+                stats_info[2], stats_info[3])
 
         await interaction.followup.send(embeds=embed_list, ephemeral=True)
 
