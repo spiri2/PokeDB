@@ -264,6 +264,12 @@ Removes the streams from the channel the command was used in.
 
 Provides stats for pokemon data in a 24 hour period, provides the aevrage amount of pokemon data you get in a 7 day period, and provides account stats.
 
+`/truncate`
+
+This will provide a drop down menu that allows you to select a table to truncate within your RDM db: `account, devices, pokemon, quest, and weather` 
+
+Note: This automatically disables foreign key check, truncates your selected table, then re-enables foreign key check. As an extra precaution, you will have to select either the confirm or cancel button to perform the actual truncate action. Consider this a "fat finger" safety measure.
+
 More features are being added.
 
 # Recieving Webhooks 
