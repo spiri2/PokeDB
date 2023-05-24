@@ -81,7 +81,8 @@ Use `git clone git@github.com:spiri2/PokeDB.git`
 
 The main configuration file. Its format is displayed below. 
 
-{"prefix":"enter_desired_prefix_here",
+```{
+"prefix":"enter_desired_prefix_here",
     "token":"enter_saved_token_here",
     "channel_whitelist":[integer_value,integer_value2,integer_value3],
     "psearch_embeds":[integer_value4,integer_value4,integer_value5],
@@ -90,7 +91,8 @@ The main configuration file. Its format is displayed below.
     "db_password":"rdm_database_password",
     "db_host":"rdm_database_ip_address",
     "db_name":"rdm_database_name",
-    "db_tables":["rdm_database_pokemon_table_name1","rdm_database_pokemon_table_name2"] }
+    "db_tables":["rdm_database_pokemon_table_name1","rdm_database_pokemon_table_name2"] 
+}```
 
 The only fields that need to be configured manually are:
  - prefix
