@@ -3,7 +3,7 @@ ParseJson = ParseJson()
 
 class Verification:
     def verify_owner(self, user_id):
-        return user_id == YOUR-DISCORD-ID 
+        return user_id == YOUR_DISCORD_ID_HERE 
 
     def modify_whitelist(self, item_id, append=True):
         whitelist = ParseJson.read_file("admin_whitelist.json")

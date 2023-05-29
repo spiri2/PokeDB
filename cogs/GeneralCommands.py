@@ -8,8 +8,10 @@ import logging
 
 from utils.ParseJson import ParseJson
 from utils.Verification import Verification
+from utils.SSHUtils import SSHUtils
 ParseJson = ParseJson()
 Verification = Verification()
+SSHUtils = SSHUtils()
 
 logging.basicConfig(level="WARNING")
 
@@ -149,6 +151,34 @@ class GeneralCommands(commands.Cog):
     @admin_add.error
     async def admin_add_error(self, interaction, error):
         await interaction.channel.send("There was an error.")
+
+
+    rdm = Group(name="rdm", description="Owner Only RDM commands.")
+
+    @rdm.command(name="update", description="Update RDM.")
+    async def rdm_update(self, interaction:discord.Interaction):
+        if not Verification.verify_owner(interaction.user.id):
+            await interaction.response.send_message("You're not authorized to use this command.", ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        await interaction.followup.send("Beginning update. Please wait.", ephemeral=True)
+
+        success = SSHUtils.rdm_update()
+
+        if success[0]:
+            output = success[1]
+            for item in output:
+                if "VersionManager" in output:
+                    output = item
+            await interaction.followup.send("RDM Updated.\n`{output}`", ephemeral=True)
+        else:
+            error = success[1]
+            for item in error:
+                if "up-to-date" in item:
+                    error = "Already updated."
+            await interaction.followup.send(f"Failed.\n`{error}`", ephemeral=True)
+
 
 async def setup(bot):
     await bot.add_cog(GeneralCommands(bot))

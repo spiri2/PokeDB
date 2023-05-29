@@ -1,1 +1,1 @@
-{"prefix": "!", "token": "DISCORD-TOKEN", "channel_whitelist": [], "psearch_embeds": [], "role_whitelist": [], "db_username": "DB-USERNAME-HERE", "db_password": "DB-PASSWORD-HERE", "db_host": "DB-HOST-HERE", "db_name": "rdmdb", "db_tables": ["pokemon"]}
+{"prefix": "!", "token": "DISCORD-TOKEN", "channel_whitelist": [], "psearch_embeds": [], "role_whitelist": [], "db_username": "DB-USERNAME-HERE", "db_password": "DB-PASSWORD-HERE", "db_host": "DB-HOST-IP-HERE", "db_name": "rdmdb", "db_tables": ["pokemon"]}

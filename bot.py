@@ -27,7 +27,7 @@ async def load_cogs():
 async def main():
     await load_cogs()
     await bot.start(config["token"])
-
+    
 @bot.event
 async def on_ready():
     print("Ready.")

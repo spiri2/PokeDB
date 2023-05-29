@@ -32,6 +32,12 @@ PokeDB also has a webhook listener set up that takes data from external RDM serv
 
 • Assign users admin controls
 
+• Truncate RDM tables
+
+• Update RDM from discord channel
+
+• Get daily stats, weekly average stats, account stats, and device stats
+
 • Recieve external data from other mappers using webhook endpoints. You'll need to use ngrok for this 
 
 # Requirements
@@ -42,7 +48,7 @@ OS: >= Ubuntu 18
 
 rdmdb
 
-ngrok (Required if you plan on receiving data from external RDM databases)
+ngrok (Required if you plan on receiving data via webhook endpoints)
 
 ## Python
 
@@ -57,6 +63,9 @@ geopy==2.3.0
 mysql_connector_repackaged==0.3.1
 
 requests==2.22.0
+
+
+paramiko==2.6.0
 
 # Configuration 
 
@@ -73,7 +82,7 @@ The following steps must be taken:
 
 ## Clone the Repo
 
-Use `git clone git@github.com:spiri2/PokeDB.git`
+Use `git clone https://github.com/spiri2/PokeDB.git`
 
 ## Bot Configuration
 
@@ -81,8 +90,9 @@ Use `git clone git@github.com:spiri2/PokeDB.git`
 
 The main configuration file. Its format is displayed below. 
 
-```{
-"prefix":"enter_desired_prefix_here",
+```
+{
+    "prefix":"enter_desired_prefix_here",
     "token":"enter_saved_token_here",
     "channel_whitelist":[integer_value,integer_value2,integer_value3],
     "psearch_embeds":[integer_value4,integer_value4,integer_value5],
@@ -91,9 +101,9 @@ The main configuration file. Its format is displayed below.
     "db_password":"rdm_database_password",
     "db_host":"rdm_database_ip_address",
     "db_name":"rdm_database_name",
-    "db_tables":["rdm_database_pokemon_table_name1","rdm_database_pokemon_table_name2"] 
-}```
-
+    "db_tables":["rdm_database_pokemon_table_name1","rdm_database_pokemon_table_name2"]
+}
+```
 The only fields that need to be configured manually are:
  - prefix
  - token
@@ -102,6 +112,16 @@ The only fields that need to be configured manually are:
  ### /utils/verification.py
 
 Line 6: `return user_id == YOUR_DISCORD_ID_HERE`
+
+Line 6 example: `return user_id == 1234567890`
+
+ ### /utils/SSHUtils.py
+        ```
+        username = "YOUR_SSH_USERNAME_HERE"
+        password = "YOUR_SSH_PASSWORD_HERE"
+        host = "YOUR_HOST_IP_HERE"
+        port = YOUR_PORT_HERE
+        ```
 
 ### /data/webhook_links.json (Optional)
 
@@ -126,19 +146,11 @@ Its format is displayed below:
 
 Youll need to add the emote IDs from your server in `utils/MsgUtils.py`:
 
-Weather emotes : `lines 26-32`
+Weather emotes : `lines 25-31` 
 
-AR Emote : `line 105`
+Raid emotes : `lines 288-301`
 
-Pokestop Emote : `line 108`
-
-Raid emotes : `lines 288-302`
-
-Wild Spawn emotes : `lines 394-403`
-
-Great/Ultra League Emote : `Lines 453-454`
-
-Stats Emotes : `Lines 513-528`
+Wild Spawn emotes : `lines 393-401`
 
 # Starting Procedures
 
@@ -259,6 +271,8 @@ This will provide a drop down menu:
 
 Removes the streams from the channel the command was used in.
 
+More features are being added.
+
 `/stats`
 
 Provides stats for pokemon data in a 24 hour period, provides the aevrage amount of pokemon data you get in a 7 day period, and provides account stats.
@@ -269,6 +283,10 @@ This will provide a drop down menu that allows you to select a table to truncate
 
 Note: This automatically disables foreign key check, truncates your selected table, then re-enables foreign key check. As an extra precaution, you will have to select either the confirm or cancel button to perform the actual truncate action. Consider this a "fat finger" safety measure.
 
+`/RDM update`
+
+You can update your RDM to latest build without having to ssh. 
+
 More features are being added.
 
 # Recieving Webhooks 
@@ -277,4 +295,4 @@ You can recieve webhook data in `json` format only by putting a unique string in
 
 # Support 
 
-Visit the Discord server if you have any questions or need support: https://discord.gg/4rU2qu6KBY
+If you have any questions or need support, join the [Discord Server](https://discord.gg/Xm6mxekkab)

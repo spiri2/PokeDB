@@ -9,7 +9,9 @@ logging.basicConfig(level="warning")
 
 
 from utils.ParseJson import ParseJson
+from utils.DBUtils import DBUtils
 ParseJson = ParseJson()
+DBUtils = DBUtils()
 
 from geopy.geocoders import Nominatim
 geolocator = Nominatim(user_agent="geoapiExercises")
@@ -399,6 +401,7 @@ class MsgUtils:
         shiny = "<a:Shiny:1086001130544320634>"
         gender = "<:male2:1103208241204297748>" #male gender sign
         gender_num = data["gender"]
+        device_name = DBUtils.get_device_name(data["username"])[0]
         if gender_num == 2:
             gender = "<:Female:1103209016001314854> "
 
@@ -471,6 +474,7 @@ class MsgUtils:
             msg +=  f"{str(data['lat'])[0:9]}, {str(data['lon'])[0:11]}"
             if data["shiny"]:
                 #msg += f"{shiny} **{data['username']}** found a shiny {shiny}"
+                msg += f"Device: {device_name}\n"
                 msg += f"{shiny} **Shiny {pokemon_name} found! {shiny}"
                 if user_obj:
                     msg += f"\n{user_obj.mention}"
@@ -489,7 +493,7 @@ class MsgUtils:
         if data["shiny"]:
             if user_obj:
                 msg += f"\n{user_obj.mention}"
-            desc+=f"{shiny}**{data['username']} found a shiny!{shiny}**"
+            desc+=f"{shiny} {device_name} ({data['username']})"
        
         emb = discord.Embed(
                 title=f"{pokemon_name} {gender} {expire_time}",
@@ -508,7 +512,8 @@ class MsgUtils:
 
         return [msg,emb]
 
-    def msg_builder_stats(self, pokemon_stats, account_stats, stats_time):
+    def msg_builder_stats(self, pokemon_stats, account_stats, stats_time, 
+            device_stats):
         pokemon_labels = [
                 "<:pokeball:1103208408712216607> Pokemon: ",
                 ":100:IV: ",
@@ -565,5 +570,22 @@ class MsgUtils:
                 description=account_desc,
                 color=discord.Color.blue())
 
-        return [daily_emb, multiday_emb, account_emb]
+        device_desc = "__UUID **|** Instance **|** Account Name__\n"
+        for device in device_stats:
+            online = "<a:alert:1109202762987737179>"
+            timestamp = time.time()-60
+            if device["last_seen"] > timestamp:
+                online = "<:online:1109204848156627074>"
+            device_desc += f"{online}{device['uuid']}**/**"
+            device_desc += f"{device['instance_name']}**/**"
+            #device_desc += f"<:character:1108447423065501757> {device['account_username']}\n"
+            device_desc += f"{device['account_username']}\n"
+
+        device_emb = discord.Embed(
+                title="Device Stats",
+                description=device_desc,
+                color=discord.Color.blue())
+
+        return [daily_emb, multiday_emb, account_emb, device_emb]
+
 
