@@ -295,4 +295,8 @@ You can recieve webhook data in `json` format only by putting a unique string in
 
 # Support 
 
-If you have any questions or need support, join the [Discord Server](https://discord.gg/Xm6mxekkab)
+If you have any questions or need support for PokeDB, join the [Discord Server](https://discord.gg/Xm6mxekkab)
+
+[RDM Discord Server](https://discord.gg/MBVQnUB)
+
+[RDM Github](https://github.com/RealDeviceMap/RealDeviceMap)
