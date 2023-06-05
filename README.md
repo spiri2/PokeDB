@@ -40,6 +40,16 @@ PokeDB also has a webhook listener set up that takes data from external RDM serv
 
 • Recieve external data from other mappers using webhook endpoints. You'll need to use ngrok for this 
 
+# Support 
+
+If you have any questions or need support for PokeDB, join the [Discord Server](https://discord.gg/Xm6mxekkab)
+
+For any questions/concerns relating to RDM:
+
+[RDM Discord Server](https://discord.gg/MBVQnUB)
+
+[RDM Github](https://github.com/RealDeviceMap/RealDeviceMap)
+
 # Requirements
 
 ## System
@@ -277,26 +287,22 @@ More features are being added.
 
 Provides stats for pokemon data in a 24 hour period, provides the aevrage amount of pokemon data you get in a 7 day period, and provides account stats.
 
+`/RDM update`
+
+You can update your RDM to latest build without having to ssh. 
+
 `/truncate`
 
 This will provide a drop down menu that allows you to select a table to truncate within your RDM db: `account, devices, pokemon, quest, and weather` 
 
 Note: This automatically disables foreign key check, truncates your selected table, then re-enables foreign key check. As an extra precaution, you will have to select either the confirm or cancel button to perform the actual truncate action. Consider this a "fat finger" safety measure.
 
-`/RDM update`
+`/truncate account`
 
-You can update your RDM to latest build without having to ssh. 
+You can remove individual accounts wihtin your rdm db. ex: `/truncate account TestAccount123`
 
 More features are being added.
 
 # Recieving Webhooks 
 
 You can recieve webhook data in `json` format only by putting a unique string in the `data > webhook_links.json` file. This is taking into consideration you have your own domain and requires an ngrok account. 
-
-# Support 
-
-If you have any questions or need support for PokeDB, join the [Discord Server](https://discord.gg/Xm6mxekkab)
-
-[RDM Discord Server](https://discord.gg/MBVQnUB)
-
-[RDM Github](https://github.com/RealDeviceMap/RealDeviceMap)
