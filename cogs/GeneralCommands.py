@@ -168,17 +168,23 @@ class GeneralCommands(commands.Cog):
 
         if success[0]:
             output = success[1]
+            print(output)
             if len(output) > 500:
                 output = output[:500]
             for item in output:
                 if "VersionManager" in output:
                     output = item
-            await interaction.followup.send("RDM Updated.\n`{output}`", ephemeral=True)
+            #await interaction.followup.send("RDM Updated.\n`{output}`", ephemeral=True)
+            await interaction.followup.send("RDM Updated.", ephemeral=True)
         else:
             error = success[1]
             for item in error:
                 if "up-to-date" in item:
                     error = "Already updated."
+                else:
+                    error = "See console."
+            print(error)
+
             await interaction.followup.send(f"Failed.\n`{error}`", ephemeral=True)
 
 
