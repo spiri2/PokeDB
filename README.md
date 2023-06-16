@@ -291,6 +291,10 @@ Provides stats for pokemon data in a 24 hour period, provides the aevrage amount
 
 You can update your RDM to latest build without having to ssh. 
 
+`rdm bsod`
+
+This will reset all disabled accounts within your rdm db. Also known as "Blue Screen of Death"
+
 `/truncate`
 
 This will provide a drop down menu that allows you to select a table to truncate within your RDM db: `account, devices, pokemon, quest, and weather` 
@@ -299,7 +303,7 @@ Note: This automatically disables foreign key check, truncates your selected tab
 
 `/truncate account`
 
-You can remove individual accounts wihtin your rdm db. ex: `/truncate account TestAccount123`
+You can remove individual accounts within your rdm db. ex: `/truncate account TestAccount123`
 
 More features are being added.
 
