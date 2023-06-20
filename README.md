@@ -42,7 +42,7 @@ PokeDB also has a webhook listener set up that takes data from external RDM serv
 
 # Support 
 
-If you have any questions or need support for PokeDB, join the [Discord Server](https://discord.gg/Xm6mxekkab)
+If you have any questions or need support for PokeDB, join the [Discord Server](https://discord.gg/hqy8pwv5Dg)
 
 # Requirements
 
@@ -279,7 +279,7 @@ More features are being added.
 
 `/stats`
 
-Provides stats for pokemon data in a 24 hour period, provides the aevrage amount of pokemon data you get in a 7 day period, and provides account stats.
+Provides stats for pokemon data in a 24 hour period, provides the average amount of pokemon data you get in a 7 day period, provides account stats, and device stats.
 
 `/RDM update`
 
@@ -289,7 +289,7 @@ You can update your RDM to latest build without having to ssh.
 
 This will reset all disabled accounts within your rdm db. Also known as "Blue Screen of Death"
 
-`/truncate`
+`/truncate table`
 
 This will provide a drop down menu that allows you to select a table to truncate within your RDM db: `account, devices, pokemon, quest, and weather` 
 
@@ -307,9 +307,9 @@ You can recieve webhook data in `json` format only by putting a unique string in
 
 # Credits
 
-PokeAPI: [Pokemon Sprites](https://github.com/PokeAPI/sprites/tree/master/sprites/pokemon/other/home)
+[Pokemon Sprites](https://github.com/PokeAPI/sprites/tree/master/sprites/pokemon/other/home)
 
-NilePlumb: [Invasion/Item Sprites](https://github.com/nileplumb/PkmnHomeIcons/tree/master/UICONS/reward/item)
+[Invasion/Item Sprites](https://github.com/nileplumb/PkmnHomeIcons/tree/master/UICONS/reward/item)
 
 [RDM Discord](https://discord.gg/MBVQnUB)
 
