@@ -44,12 +44,6 @@ PokeDB also has a webhook listener set up that takes data from external RDM serv
 
 If you have any questions or need support for PokeDB, join the [Discord Server](https://discord.gg/Xm6mxekkab)
 
-For any questions/concerns relating to RDM:
-
-[RDM Discord Server](https://discord.gg/MBVQnUB)
-
-[RDM Github](https://github.com/RealDeviceMap/RealDeviceMap)
-
 # Requirements
 
 ## System
@@ -310,3 +304,15 @@ More features are being added.
 # Recieving Webhooks 
 
 You can recieve webhook data in `json` format only by putting a unique string in the `data > webhook_links.json` file. This is taking into consideration you have your own domain and requires an ngrok account. 
+
+# Credits
+
+PokeAPI: [Pokemon Sprites](https://github.com/PokeAPI/sprites/tree/master/sprites/pokemon/other/home)
+
+NilePlumb: [Invasion/Item Sprites](https://github.com/nileplumb/PkmnHomeIcons/tree/master/UICONS/reward/item)
+
+[RDM Discord](https://discord.gg/MBVQnUB)
+
+[RDM Github](https://github.com/RealDeviceMap/RealDeviceMap)
+
+
