@@ -1,4 +1,4 @@
-PokeDB is a PokémonGo feed bot that queries data from your RDM database and parses it based on user input. From there it translates the data into a readable format and sends to a discord channel either in text or embed format.
+PokeDB is a PokémonGo utility bot that queries data from your RDM database and parses it based on user input. From there it translates the data into a readable format and sends to a discord channel either in text or embed format.
 
 PokeDB also has a webhook listener set up that takes data from external RDM services (ie: other mappers) and parses it in the same way as the other data. Additionally there are admin commands and toggles for most of these functions.
 
@@ -150,12 +150,6 @@ Its format is displayed below:
 
 Youll need to add the emote IDs from your server in `utils/MsgUtils.py`:
 
-Weather emotes : `lines 25-31` 
-
-Raid emotes : `lines 288-301`
-
-Wild Spawn emotes : `lines 393-401`
-
 # Starting Procedures
 
 Three processes must be started for the bot to properly function:
@@ -279,9 +273,9 @@ More features are being added.
 
 `/stats`
 
-Provides stats for pokemon data in a 24 hour period, provides the average amount of pokemon data you get in a 7 day period, provides account stats, and device stats.
+Provides stats for pokemon data in a 24 hour period, average amount of pokemon data you get in a 7 day period, account stats, and device stats.
 
-`/RDM update`
+`/rdm update`
 
 You can update your RDM to latest build without having to ssh. 
 
@@ -311,8 +305,4 @@ You can recieve webhook data in `json` format only by putting a unique string in
 
 [Invasion/Item Sprites](https://github.com/nileplumb/PkmnHomeIcons/tree/master/UICONS/reward/item)
 
-[RDM Discord](https://discord.gg/MBVQnUB)
-
-[RDM Github](https://github.com/RealDeviceMap/RealDeviceMap)
-
-
+[RDM](https://github.com/RealDeviceMap/RealDeviceMap)
