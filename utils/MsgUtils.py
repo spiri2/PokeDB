@@ -16,6 +16,9 @@ DBUtils = DBUtils()
 from geopy.geocoders import Nominatim
 geolocator = Nominatim(user_agent="geoapiExercises")
 
+from utils.PogoUtils import PogoUtils
+PogoUtils = PogoUtils()
+
 pokemon_list = ParseJson.read_file("pokemon_list.json")
 move_list = ParseJson.read_file("moves.json")
 weather_boost_info = ParseJson.read_file("poke_weather.json")
@@ -305,6 +308,9 @@ class MsgUtils:
         mega = ""
         if data["raid_level"] == 6:
             mega = "{Mega}"
+        alignment = ""
+        if data["raid_pokemon_alignment"]:
+            alignment = "{Shadow}"
 
         expire_time = data["raid_end_timestamp"]
         expire_time = datetime.datetime.fromtimestamp(expire_time)
@@ -348,7 +354,7 @@ class MsgUtils:
 
         if not embed:
             #msg = f"{team} {ex} {get_gif} **{data['name']}**\n"
-            msg = f"{team} {ex} **{pokemon_name}** {mega} {gender}\n"
+            msg = f"{team} {ex} **{pokemon_name}** {mega} {alignment} {gender}\n"
             msg += f"{ms} {move1} / {move2}\n"
             #msg += f"{raid_battle}\n"
             msg += f"{cp} | {expire_time}\n"
@@ -363,7 +369,7 @@ class MsgUtils:
         desc += location
 
         emb = discord.Embed(
-                title=f"{team} {ex} {pokemon_name} {mega} {gender}",
+                title=f"{team} {ex} {pokemon_name} {mega} {alignment} {gender}",
                 description = desc,
                 color=discord.Color.blue())
         gif_url = self.get_gif(poke_id)
@@ -404,6 +410,9 @@ class MsgUtils:
         device_name = DBUtils.get_device_name(data["username"])[0]
         if gender_num == 2:
             gender = "<:Female:1103209016001314854> "
+        star = "<:stardust:1120857081625456660>"
+        rare_candy = "<:rarecandy:1120706487354916986>"
+        xl_candy = "<:xlcandy:1120707243101388820>"
 
         boosted = self.get_weather_boost(poke_id, data["weather"])
 
@@ -418,6 +427,9 @@ class MsgUtils:
 
         move1 = move_list[data["move_1"]]["ename"]
         move2 = move_list[data["move_2"]]["ename"]
+
+        cost_to_40 = PogoUtils.calculate_powerup_cost(data["level"], 40)
+        cost_to_50 = PogoUtils.calculate_powerup_cost(data["level"], 50)
 
         try:
             location_dict = geolocator.reverse(str(data["lat"])+","+str(data["lon"])).raw["address"]
@@ -469,6 +481,8 @@ class MsgUtils:
             msg += f"**{iv} {data['iv']}** ({data['atk_iv']}/{data['def_iv']}/{data['sta_iv']}) "
             msg += f"**{cp} {data['cp']} {lvl} {data['level']}**\n"
             msg += f"{ms} {move1} / {move2}"
+            msg += f"**__Power Up Cost__**:\n{lvl}**40** ={star}{cost_to_40['stardust']}{rare_candy}{cost_to_40['candy']}\n"
+            msg += f"{lvl}**50** ={star}{cost_to_50['stardust']}{rare_candy}{cost_to_50['candy']}{xl_candy}{cost_to_50['xl_candy']}"
             #msg += pvp_sect
             msg += f"{location}\n"
             msg +=  f"{str(data['lat'])[0:9]}, {str(data['lon'])[0:11]}"
@@ -486,8 +500,10 @@ class MsgUtils:
         desc += boosted
         desc += f"{iv}**{data['iv']}** ({data['atk_iv']}/{data['def_iv']}/{data['sta_iv']}) " 
         desc += f"{cp}**{data['cp']}** {lvl}**{data['level']}**\n"
-        desc += f"{ms} {move1} / {move2}"
+        desc += f"{ms} {move1} / {move2}\n"
         #desc += pvp_sect
+        desc += f"**__Power Up Cost__**:\n{lvl}**40**:{star}{cost_to_40['stardust']} {rare_candy}{cost_to_40['candy']}\n"
+        desc += f"{lvl}**50**:{star}{cost_to_50['stardust']} {rare_candy}{cost_to_50['candy']} {xl_candy}{cost_to_50['xl_candy']}"
         desc += f"{location}\n"
 
         if data["shiny"]:
