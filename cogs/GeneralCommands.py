@@ -9,9 +9,11 @@ import logging
 from utils.ParseJson import ParseJson
 from utils.Verification import Verification
 from utils.SSHUtils import SSHUtils
+from utils.DBUtils import DBUtils
 ParseJson = ParseJson()
 Verification = Verification()
 SSHUtils = SSHUtils()
+DBUtils = DBUtils()
 
 logging.basicConfig(level="WARNING")
 
@@ -186,6 +188,16 @@ class GeneralCommands(commands.Cog):
             print(error)
 
             await interaction.followup.send(f"Failed.\n`{error}`", ephemeral=True)
+
+    @rdm.command(name="bsod", description="Reset Disabled Accounts (Admin-Only)")
+    async def reset_accounts(self, interaction:discord.Interaction):
+        if not Verification.verify_on_whitelist(interaction.user.id, interaction.user.roles):
+            await interaction.response.send_message("You're not authorized to use this command.", ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        msg = DBUtils.reset_accounts()
+        await interaction.followup.send(msg, ephemeral=True)
 
 
 async def setup(bot):
