@@ -610,9 +610,6 @@ class DBCommands(commands.Cog):
                 stats_info[2], stats_info[3])
 
         await interaction.followup.send(embeds=embed_list, ephemeral=True)
-
-
-
-
+    
 async def setup(bot):
     await bot.add_cog(DBCommands(bot))
