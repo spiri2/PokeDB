@@ -481,8 +481,8 @@ class MsgUtils:
             msg += f"**{iv} {data['iv']}** ({data['atk_iv']}/{data['def_iv']}/{data['sta_iv']}) "
             msg += f"**{cp} {data['cp']} {lvl} {data['level']}**\n"
             msg += f"{ms} {move1} / {move2}"
-            msg += f"**__Power Up Cost__**:\n{lvl}**40** ={star}{cost_to_40['stardust']}{rare_candy}{cost_to_40['candy']}\n"
-            msg += f"{lvl}**50** ={star}{cost_to_50['stardust']}{rare_candy}{cost_to_50['candy']}{xl_candy}{cost_to_50['xl_candy']}"
+            msg += f"**__Power Up Cost__**:\n{lvl}**40** ={star}{format(cost_to_40['stardust'], ',d')}{rare_candy}{cost_to_40['candy']}\n"
+            msg += f"{lvl}**50** ={star}{format(cost_to_50['stardust'], ',d')}{rare_candy}{cost_to_50['candy']}{xl_candy}{cost_to_50['xl_candy']}"
             #msg += pvp_sect
             msg += f"{location}\n"
             msg +=  f"{str(data['lat'])[0:9]}, {str(data['lon'])[0:11]}"
@@ -502,8 +502,8 @@ class MsgUtils:
         desc += f"{cp}**{data['cp']}** {lvl}**{data['level']}**\n"
         desc += f"{ms} {move1} / {move2}\n"
         #desc += pvp_sect
-        desc += f"**__Power Up Cost__**:\n{lvl}**40**:{star}{cost_to_40['stardust']} {rare_candy}{cost_to_40['candy']}\n"
-        desc += f"{lvl}**50**:{star}{cost_to_50['stardust']} {rare_candy}{cost_to_50['candy']} {xl_candy}{cost_to_50['xl_candy']}"
+        desc += f"**__Power Up Cost__**:\n{lvl}**40**:{star}{format(cost_to_40['stardust'], ',d')} {rare_candy}{cost_to_40['candy']}\n"
+        desc += f"{lvl}**50**:{star}{format(cost_to_50['stardust'], ',d')} {rare_candy}{cost_to_50['candy']} {xl_candy}{cost_to_50['xl_candy']}"
         desc += f"{location}\n"
 
         if data["shiny"]:
@@ -603,5 +603,3 @@ class MsgUtils:
                 color=discord.Color.blue())
 
         return [daily_emb, multiday_emb, account_emb, device_emb]
-
-
