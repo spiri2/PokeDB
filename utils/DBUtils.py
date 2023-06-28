@@ -17,7 +17,7 @@ class DBUtils:
                 "is_ditto","display_pokemon_id"]
         self.raid_items = ["raid_pokemon_id","lat","lon","raid_end_timestamp","raid_pokemon_id","raid_level",
                 "ex_raid_eligible","raid_pokemon_move_1","raid_pokemon_move_2","raid_pokemon_cp",
-                "raid_pokemon_gender","id","name","team_id","raid_spawn_timestamp"]
+                "raid_pokemon_gender","id","name","team_id","raid_spawn_timestamp", "raid_pokemon_alignment"]
         self.weather_items = ["id", "latitude", "longitude", "gameplay_condition"]
         self.quest_items = ["id","lat","lon","quest_timestamp","quest_title","quest_rewards",
                 "quest_pokemon_id","ar_scan_eligible","quest_target","name"]
@@ -387,6 +387,24 @@ class DBUtils:
             cnx.commit()
 
             msg = f"<a:alert:1109202762987737179> Truncated: `{account_username}`"
+        except Exception as e:
+            msg = f"Failed.\n`{e}`"
+
+        cursor.close()
+        cnx.close()
+        return msg
+
+    def reset_accounts(self):
+        cnx = self.get_cnx()
+        cursor = cnx.cursor()
+
+        sql = f"UPDATE account SET last_disabled = 0"
+
+        try:
+            cursor.execute(sql)
+            cnx.commit()
+            
+            msg = f"<a:alert:1109202762987737179> Disabled Accounts Reset."
         except Exception as e:
             msg = f"Failed.\n`{e}`"
 
