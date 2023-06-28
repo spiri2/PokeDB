@@ -157,7 +157,7 @@ class GeneralCommands(commands.Cog):
 
     rdm = Group(name="rdm", description="Owner Only RDM commands.")
 
-    @rdm.command(name="update", description="Update RDM.")
+    @rdm.command(name="update", description="Update RDM. (Owner-Only)")
     async def rdm_update(self, interaction:discord.Interaction):
         if not Verification.verify_owner(interaction.user.id):
             await interaction.response.send_message("You're not authorized to use this command.", ephemeral=True)
@@ -189,15 +189,36 @@ class GeneralCommands(commands.Cog):
 
             await interaction.followup.send(f"Failed.\n`{error}`", ephemeral=True)
 
-    @rdm.command(name="bsod", description="Reset Disabled Accounts (Admin-Only)")
+    @rdm.command(name="bsod", description="Reset Disabled Accounts (Owner-Only)")
     async def reset_accounts(self, interaction:discord.Interaction):
-        if not Verification.verify_on_whitelist(interaction.user.id, interaction.user.roles):
+        if not Verification.verify_owner(interaction.user.id):
             await interaction.response.send_message("You're not authorized to use this command.", ephemeral=True)
             return
         await interaction.response.defer(ephemeral=True)
 
         msg = DBUtils.reset_accounts()
         await interaction.followup.send(msg, ephemeral=True)
+
+    @rdm.command(name="restart", description="Restart RDM. (Owner-Only)")
+    async def rdm_restart(self, interaction:discord.Interaction):
+        if not Verification.verify_owner(interaction.user.id):
+            await interaction.response.send_message("You're not authorized to use this command.", ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        await interaction.followup.send("Restarting... please wait.", ephemeral=True)
+
+        msg = SSHUtils.rdm_restart()
+
+        if msg[0]:
+            output = msg[1]
+            await interaction.followup.send("Restarted successfully.", ephemeral=True)
+        else:
+            error = msg[1]
+            try:
+                await interaction.followup.send(f"Failed.\n`{error}`", ephemeral=True)
+            except:
+                await interaction.follow.send("Failed. See console.", ephemeral=True)
 
 
 async def setup(bot):
