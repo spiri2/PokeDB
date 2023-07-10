@@ -1,11 +1,11 @@
 import paramiko
 from paramiko.client import SSHClient
 class SSHUtils:
-    def rdm_update(self):
-        username = "YOUR_SSH_USERNAME_HERE"
-        password = "YOUR_SSH_PASSWORD_HERE"
-        host = "YOUR_HOST_IP_HERE"
-        port = YOUR_PORT_HERE
+    def __init__(self):
+        self.username = "SSH_USERNAME"
+        self.password = "SSH_PASSWORD"
+        self.host = "HOST_IP"
+        self.port = PORT_HERE
 
     def rdm_update(self):
 
