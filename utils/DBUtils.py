@@ -203,6 +203,8 @@ class DBUtils:
         expire_timestamp = "expire_timestamp"
         if params["type"] == "gym":
             expire_timestamp = "raid_end_timestamp"
+        if params["type"] == "stats":
+            return []
 
         query_msg = f"""SELECT {','.join(item_choices[params['type']])} FROM {params['type']} 
         WHERE {expire_timestamp} > %s AND """
@@ -270,7 +272,7 @@ class DBUtils:
         cursor.close()
         cnx.close()
 
-    def get_stats(self):
+    def get_stats(self, instance=None):
         cnx = self.get_cnx()
         cursor = cnx.cursor()
 
@@ -347,7 +349,9 @@ class DBUtils:
         cursor.execute(sql)
         stats_time = list(cursor)[-1]
 
-        sql = "SELECT uuid, instance_name, account_username, last_seen FROM device"
+        sql = f"SELECT uuid, instance_name, account_username, last_seen FROM device"
+        if instance:
+            sql = f"SELECT uuid, instance_name, account_username, last_seen FROM device WHERE instance_name = '{instance}'"
         cursor.execute(sql)
         for device in cursor:
             device_stats.append(
