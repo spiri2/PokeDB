@@ -28,6 +28,7 @@ class Streams(commands.Cog):
         self.clear_time = 0
         self.clear_time_weather = 0
         self.streamer.start()
+        self.stats_stream.start()
 
     def clear_cache(self):
         timestamp = time.time()
@@ -121,6 +122,31 @@ class Streams(commands.Cog):
 
         self.streamer.restart()
         #logging.warning("STREAM RESTARTED")
+
+
+    @tasks.loop(minutes=5)
+    async def stats_stream(self):
+        streams = ParseJson.read_file("streams.json")
+
+        for channel_id in streams:
+           params = streams[channel_id] 
+           if params["type"] != "stats":
+               continue
+           stats = DBUtils.get_stats()
+           response = MsgUtils.msg_builder_stats(stats[0], stats[1], stats[2], stats[3])
+
+           channel = await self.bot.fetch_channel(channel_id)
+           await channel.purge()
+           await channel.send(embeds=response)
+
+    @stats_stream.before_loop
+    async def stats_before(self):
+        await self.bot.wait_until_ready()
+
+    @stats_stream.error
+    async def stats_error(self, error):
+        logging.warning(error)
+        self.stats_stream.restart()
 
 async def setup(bot):
     await bot.add_cog(Streams(bot))

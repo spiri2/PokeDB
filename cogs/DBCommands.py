@@ -23,7 +23,7 @@ item_list = ParseJson.read_file("item_list.json")
 logging.basicConfig(level="WARNING")
 
 class MenuSelect(discord.ui.Select):
-    def __init__(self, command_name):
+    def __init__(self, command_name, instances=[]):
         self.command_name = command_name
         self.weather_options = [
                 discord.SelectOption(label="Sunny"),
@@ -50,10 +50,16 @@ class MenuSelect(discord.ui.Select):
                 discord.SelectOption(label="Quest"),
                 discord.SelectOption(label="Weather")
                 ]
+        self.stats_options = [
+                discord.SelectOption(label="Total")
+                ]
+        for option in instances:
+            self.stats_options.append(discord.SelectOption(label=option))
         command_info = {"wsearch":["Select weather option.",self.weather_options],
                 "weather_track":["Select weather option.",self.weather_options],
                 "rocketsearch":["Select leader.",self.leader_options],
-                "truncate":["Select table.",self.table_options]}
+                "truncate":["Select table.",self.table_options],
+                "stats":["Select Instance.", self.stats_options]}
 
         super().__init__(placeholder=command_info[self.command_name][0], 
                 min_values=1,
@@ -160,6 +166,17 @@ class MenuSelect(discord.ui.Select):
                 ctr += 1
             if not leader_pokestops:
                 await interaction.followup.send("No rocket leaders found.", ephemeral=True)
+
+        if self.command_name == "stats":
+            instance = self.values[0]
+            if instance == "Total":
+                instance = None
+
+            stats_info = DBUtils.get_stats(instance)
+            embed_list = MsgUtils.msg_builder_stats(stats_info[0], stats_info[1],
+                    stats_info[2], stats_info[3])
+
+            await interaction.followup.send(embeds=embed_list, ephemeral=True)
 
 class MenuView(discord.ui.View):
     def __init__(self, command):
@@ -574,6 +591,27 @@ class DBCommands(commands.Cog):
         view = MenuView("weather_track")
         await interaction.followup.send(view=view, ephemeral=True)
 
+    @track_group.command(name="stats", description="Set up a continuous stats stream. (Admin-Only)")
+    async def track_stats(self, interaction:discord.Interaction):
+        if not Verification.verify_on_whitelist(interaction.user.id,
+                interaction.user.roles):
+            await interaction.response.send_message("You aren't authorized to use this command.", ephemeral=True)
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        streams = ParseJson.read_file("streams.json")
+        args = {"type":"stats", "embed":True}
+
+        channel_id = interaction.channel.id
+        streams[channel_id] = args
+        ParseJson.save_file("streams.json", streams)
+
+        msg = f"Stats stream created in {interaction.channel.mention}."
+        await interaction.followup.send(msg, ephemeral=True)
+        
+
+
 
     @app_commands.command(name="untrack", 
     description="Remove a data stream from the current channel. (Admin-Only)")
@@ -605,7 +643,9 @@ class DBCommands(commands.Cog):
 
         await interaction.response.defer(ephemeral=True)
 
-        stats_info = DBUtils.get_stats()
+        
+        #get all instances, send as parameter to menuselect class 
+        stats_info = DBUtils.get_stats(None)
         embed_list = MsgUtils.msg_builder_stats(stats_info[0], stats_info[1],
                 stats_info[2], stats_info[3])
 
