@@ -1,0 +1,4 @@
+{
+"raid":["{team} {ex} {pokemon_name} {mega} {alignment} {gender}","{cp} \n{ms} {move1}, {move2} \nEnds: {expire_time}{location}"],
+"pokemon":["{pokemon_name} {gender} {expire_time}","{boosted}{iv} ({atk_iv}/{def_iv}/{sta_iv}) {cp} {lvl}**{lvl_val}**\n{ms} {move1} / {move2}\n**__Power Up Cost__**:\n{lvl}**40**:{star}{star_cost_40} {rare_candy}{candy_cost_40}\n{lvl}**50**:{star}{star_cost_50} {rare_candy}{candy_cost_50} {xl_candy}{xlcandy_cost_50}{location}\n"]
+}
