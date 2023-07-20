@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord.app_commands import Group
 from discord.ext.commands import GroupCog
 import asyncio
@@ -33,6 +33,7 @@ class GeneralCommands(commands.Cog):
 
     toggle = Group(name="toggle", description="Admin Only Config Commands.")
     admin_group = Group(parent=toggle, name="admin", description="Admin Only Config Commands.")
+
 
 
     @toggle.command(name="embed", description="Toggle embedded posts for a channel's stream.")
@@ -219,6 +220,140 @@ class GeneralCommands(commands.Cog):
                 await interaction.followup.send(f"Failed.\n`{error}`", ephemeral=True)
             except:
                 await interaction.follow.send("Failed. See console.", ephemeral=True)
+
+    format_cmd = Group(name="format", description="Admin Only Formatting Commands.")
+
+    @format_cmd.command(name="view", description="See current formats. (Admin-Only)")
+    async def format_view(self, interaction=discord.Interaction):
+        if not Verification.verify_on_whitelist(interaction.user.id, interaction.user.roles):
+            await interaction.response.send_message("Youre not authorized to use this command.", ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        formats = ParseJson.read_file("format.json")
+        msg = f"**__Pokemon__**:\nTitle:```{formats['pokemon'][0]}```Description:```{formats['pokemon'][1]}```"
+        msg += f"**__Raids__**:\nTitle:```{formats['raid'][0]}```Description:```{formats['raid'][1]}```"
+
+        await interaction.followup.send(msg, ephemeral=True)
+
+    @format_cmd.command(name="help", description="Info. about formatting. (Admin-Only)")
+    async def format_help(self, interaction:discord.Interaction):
+        if not Verification.verify_on_whitelist(interaction.user.id, interaction.user.roles):
+            await interaction.response.send_message("Youre not authorized to use this command.", ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        desc_1 = "-The bot will attempt to replace anything surrounded by curly brakcets ({}) with the value they describe."
+        desc_1 += "Ex: {lvl_val} --> 10\n-Use a \\n character to jump to a new line.\n"
+        desc_1 += "-Surround words with '**' for bold.\n-Surround words with '__' for underline.\n"
+        desc_1 += "-Surround words with '*' for italics."
+        desc_1 += "-Use '/format reset' to reset formats to their default values.\n"
+        desc_1 += "-Use '/format view' to see the current formats.\n"
+        desc_1 += "-Use '/format set' to set a new format."
+        
+        desc_2 = "Pokemon Values:\n```{boosted},{iv},{atk_iv},{def_iv},{sta_iv},{cp},{lvl},{lvl_val},{ms},{move1},{move2},{star_cost_40},{star_cost_50},{candy_cost_40},{candy_cost_50},{xlcandy_cost_50},{star},{xl_candy},{location},{rare_candy},{pokemon_name},{gender},{expire_time}```\n"
+        desc_2 += "Raid values:\n```{cp},{ms},{move1},{move2},{expire_time},{location},{team},{ex},{pokemon_name},{mega},{alignment},{gender}```"
+
+        emb1 = discord.Embed(
+                title="Format Help",
+                description=desc_1,
+                color=discord.Color.blue())
+        emb2 = discord.Embed(title="Format Help contd.",
+                description=desc_2,
+                color=discord.Color.blue())
+        await interaction.followup.send(embeds=[emb1,emb2], ephemeral=True)
+
+    @format_cmd.command(name="reset", description="Reset format to default value. (Admin-Only)")
+    async def format_reset(self, interaction:discord.Interaction):
+        if not Verification.verify_on_whitelist(interaction.user.id, interaction.user.roles):
+            await interaction.response.send_message("Youre not authorized to use this command.", ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        view = MenuView("reset")
+        await interaction.followup.send(view=view, ephemeral=True)
+
+    @format_cmd.command(name="set", description="Set a new format. (Admin-Only)")
+    async def format_set(self, interaction:discord.Interaction):
+        if not Verification.verify_on_whitelist(interaction.user.id, interaction.user.roles):
+            await interaction.response.send_message("Youre not authorized to use this command.", ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+
+        view = MenuView("set")
+        await interaction.followup.send(view=view, ephemeral=True)
+
+
+class MenuSelect(discord.ui.Select):
+    def __init__(self, command_name):
+        self.command_name = command_name
+        self.format_options = [
+                discord.SelectOption(label="Pokemon"),
+                discord.SelectOption(label="Raid")
+                ]
+        command_info = {"reset":["Select choice to reset.",self.format_options],
+                "set":["Select choice to modify.",self.format_options]}
+
+        super().__init__(placeholder=command_info[self.command_name][0],
+                min_values=1,
+                max_values=1,
+                options=command_info[self.command_name][1])
+
+    async def callback(self, interaction: discord.Interaction):
+
+        if self.command_name == "reset":
+            await interaction.response.defer(ephemeral=True)
+            choice = self.values[0].lower()
+
+            default_formats = ParseJson.read_file("DEFAULT_FORMAT.json")
+            user_formats = ParseJson.read_file("format.json")
+
+            user_formats[choice][0] = default_formats[choice][0]
+            user_formats[choice][1] = default_formats[choice][1]
+
+            ParseJson.save_file("format.json", user_formats)
+
+            await interaction.followup.send(f"`{choice}` Format reset.", ephemeral=True)
+
+        if self.command_name == "set":
+            choice = self.values[0].lower()
+            await interaction.response.send_modal(FormatBox(choice))
+
+class MenuView(discord.ui.View):
+    def __init__(self, command):
+        super().__init__()
+        self.add_item(MenuSelect(command))
+
+class FormatBox(discord.ui.Modal, title="Format"):
+    def __init__(self, choice):
+        super().__init__()
+        self.choice = choice
+
+    title_input = discord.ui.TextInput(
+            label="Title Format",
+            placeholder="Write your title format here.\n*{pokemon_name}* Ends: __{dsp}__",
+            style=discord.TextStyle.long,
+            required=False,
+            max_length=200)
+
+    format_input = discord.ui.TextInput(
+            label="Description Format",
+            placeholder="Write your format here.\n{iv}\\n{lvl} **{cp}**",
+            style=discord.TextStyle.long,
+            required=False,
+            max_length=1500)
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        user_formats = ParseJson.read_file("format.json")
+
+        if self.title_input.value:
+            user_formats[self.choice][0] = self.title_input.value
+        if self.format_input.value:
+            user_formats[self.choice][1] = self.format_input.value
+
+        ParseJson.save_file("format.json", user_formats)
+
+        await interaction.followup.send(f"`{self.choice}` Format Updated.", ephemeral=True)
 
 
 async def setup(bot):
