@@ -362,14 +362,29 @@ class MsgUtils:
             msg += location
 
             return [msg,None]
-        msg = f"{lat}, {lon}"
-        desc = f"{cp} \n{ms} {move1}, {move2} \n"
-        #desc += f"{raid_battle} \n"
-        desc += f"Ends: {expire_time}"
-        desc += location
+
+        try:
+            #custom user formats. reverts to original if failure
+            msg = f"{lat}, {lon}"
+            raid_format_map = {"cp":cp,"ms":ms,"move1":move1,"move2":move2,"expire_time":expire_time,
+                    "location":location,"team":team,"ex":ex,"pokemon_name":pokemon_name,"mega":mega,
+                    "alignment":alignment,"gender":gender}
+            user_format = ParseJson.read_file("format.json")["raid"][1]
+            desc = user_format.format(**raid_format_map)
+
+            user_format_title = ParseJson.read_file("format.json")["raid"][0]
+            title = user_format_title.format(**raid_format_map)
+        except:
+            msg = f"{lat}, {lon}"
+            desc = f"{cp} \n{ms} {move1}, {move2} \n"
+            #desc += f"{raid_battle} \n"
+            desc += f"Ends: {expire_time}"
+            desc += location
+            title = f"{team} {ex} {pokemon_name} {mega} {alignment} {gender}"
+
 
         emb = discord.Embed(
-                title=f"{team} {ex} {pokemon_name} {mega} {alignment} {gender}",
+                title=title,
                 description = desc,
                 color=discord.Color.blue())
         gif_url = self.get_gif(poke_id)
@@ -399,10 +414,14 @@ class MsgUtils:
         poke_id = data["pokemon_id"]
         pokemon_name = pokemon_list[poke_id-1]
         form = data["form"]
-        iv = "<:IV:1103208235558764544>"
-        cp = "<:CP:1103208227358912512>"
+        iv = f"<:IV:1103208235558764544> **{data['iv']}**"
+        atk_iv = f"{data['atk_iv']}"
+        def_iv = f"{data['def_iv']}"
+        sta_iv = f"{data['sta_iv']}"
+        cp = f"<:CP:1103208227358912512> **{data['cp']}**"
         dsp = "<:DSP:1103208228793360394>"
-        lvl = "<:LV:1103208238268293192>"
+        lvl = f"<:LV:1103208238268293192>"
+        lvl_val = f"{data['level']}"
         ms = "<:MS:1103208325069406228>"
         shiny = "<a:Shiny:1086001130544320634>"
         gender = "<:male2:1103208241204297748>" #male gender sign
@@ -430,6 +449,12 @@ class MsgUtils:
 
         cost_to_40 = PogoUtils.calculate_powerup_cost(data["level"], 40)
         cost_to_50 = PogoUtils.calculate_powerup_cost(data["level"], 50)
+
+        star_cost_40 = format(cost_to_40['stardust'], ',d')
+        star_cost_50 = format(cost_to_50['stardust'], ',d')
+        candy_cost_40 = format(cost_to_40['candy'], ',d')
+        candy_cost_50 = format(cost_to_50['candy'], ',d')
+        xlcandy_cost_50 = format(cost_to_50['xl_candy'], ',d')
 
         try:
             location_dict = geolocator.reverse(str(data["lat"])+","+str(data["lon"])).raw["address"]
@@ -478,11 +503,11 @@ class MsgUtils:
                 pokemon_name = f"Ditto [{pokemon_list[data['display_pokemon_id']-1]}]"
             msg = f"**{pokemon_name}** {gender} {expire_time}\n"
             msg += boosted
-            msg += f"**{iv} {data['iv']}** ({data['atk_iv']}/{data['def_iv']}/{data['sta_iv']}) "
-            msg += f"**{cp} {data['cp']} {lvl} {data['level']}**\n"
+            msg += f"**{iv}** ({atk_iv}/{def_iv}/{sta_iv}) "
+            msg += f"**{cp} {lvl}**{lvl_val}**\n"
             msg += f"{ms} {move1} / {move2}"
-            msg += f"**__Power Up Cost__**:\n{lvl}**40** ={star}{format(cost_to_40['stardust'], ',d')}{rare_candy}{cost_to_40['candy']}\n"
-            msg += f"{lvl}**50** ={star}{format(cost_to_50['stardust'], ',d')}{rare_candy}{cost_to_50['candy']}{xl_candy}{cost_to_50['xl_candy']}"
+            msg += f"**__Power Up Cost__**:\n{lvl}**40** ={star}{star_cost_40}{rare_candy}{candy_cost_40}\n"
+            msg += f"{lvl}**50** ={star}{star_cost_50}{rare_candy}{candy_cost_50}{xl_candy}{xlcandy_cost_50}"
             #msg += pvp_sect
             msg += f"{location}\n"
             msg +=  f"{str(data['lat'])[0:9]}, {str(data['lon'])[0:11]}"
@@ -495,16 +520,36 @@ class MsgUtils:
             msg += "\n---"
             return [msg,None]
 
-        msg = f"{str(data['lat'])[0:9]}, {str(data['lon'])[0:11]}"
-        desc = ""
-        desc += boosted
-        desc += f"{iv}**{data['iv']}** ({data['atk_iv']}/{data['def_iv']}/{data['sta_iv']}) " 
-        desc += f"{cp}**{data['cp']}** {lvl}**{data['level']}**\n"
-        desc += f"{ms} {move1} / {move2}\n"
-        #desc += pvp_sect
-        desc += f"**__Power Up Cost__**:\n{lvl}**40**:{star}{format(cost_to_40['stardust'], ',d')} {rare_candy}{cost_to_40['candy']}\n"
-        desc += f"{lvl}**50**:{star}{format(cost_to_50['stardust'], ',d')} {rare_candy}{cost_to_50['candy']} {xl_candy}{cost_to_50['xl_candy']}"
-        desc += f"{location}\n"
+        if data["is_ditto"]:
+            pokemon_name = "Ditto [{pokemon_list[data['display_pokemon_id']-1]}]"
+
+        try:
+            #custom user format, revert to default if failure
+            msg = f"{str(data['lat'])[0:9]}, {str(data['lon'])[0:11]}"
+            user_format = ParseJson.read_file("format.json")["pokemon"][1]
+            pokemon_format_map = {
+                    "boosted":boosted, "iv":iv, "atk_iv":atk_iv,"def_iv":def_iv,"sta_iv":sta_iv,"cp":cp,"lvl":lvl,
+                    "ms":ms,"move1":move1,"move2":move2,"star_cost_40":star_cost_40,"star_cost_50":star_cost_50,
+                    "candy_cost_40":candy_cost_40,"candy_cost_50":candy_cost_50,"xlcandy_cost_50":xlcandy_cost_50,
+                    "star":star,"xl_candy":xl_candy,"location":location,"rare_candy":rare_candy,"lvl_val":lvl_val
+                    ,"pokemon_name":pokemon_name,"gender":gender,"expire_time":expire_time}
+            desc = user_format.format(**pokemon_format_map)
+
+            title_format = ParseJson.read_file("format.json")["pokemon"][0]
+            title = title_format.format(**pokemon_format_map)
+        except Exception as e:
+            msg = f"{str(data['lat'])[0:9]}, {str(data['lon'])[0:11]}"
+            desc = ""
+            desc += boosted
+            desc += f"{iv} ({atk_iv}/{def_iv}/{sta_iv}) " 
+            desc += f"{cp} {lvl}**{lvl_val}**\n"
+            desc += f"{ms} {move1} / {move2}\n"
+            #desc += pvp_sect
+            desc += f"**__Power Up Cost__**:\n{lvl}**40**:{star}{star_cost_40} {rare_candy}{candy_cost_40}\n"
+            desc += f"{lvl}**50**:{star}{star_cost_50} {rare_candy}{candy_cost_50} {xl_candy}{xlcandy_cost_50}"
+            desc += f"{location}\n"
+
+            title = f"{pokemon_name} {gender} {expire_time}"
 
         if data["shiny"]:
             if user_obj:
@@ -512,14 +557,10 @@ class MsgUtils:
             desc+=f"{shiny} {device_name} ({data['username']})"
        
         emb = discord.Embed(
-                title=f"{pokemon_name} {gender} {expire_time}",
+                title=title,
                 description = desc,
                 color=discord.Color.blue())
-        if data["is_ditto"]:
-            emb = discord.Embed(
-                    title=f"Ditto [{pokemon_list[data['display_pokemon_id']-1]}] {gender} {expire_time}",
-                    description = desc,
-                    color=discord.Color.blue())
+
         gif_url = self.get_gif(poke_id)
         if data["shiny"]:
             gif_url = self.get_gif(poke_id, True)
@@ -603,3 +644,5 @@ class MsgUtils:
                 color=discord.Color.blue())
 
         return [daily_emb, multiday_emb, account_emb, device_emb]
+
+
